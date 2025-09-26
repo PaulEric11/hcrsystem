@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HairCare Recommender</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fce4ec;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      width: 350px;
+      text-align: center;
+    }
+
+    h1, h2, h3 {
+      color: #8e24aa;
+    }
+
+    input, select, button {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    button {
+      background: #8e24aa;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #6a1b9a;
+    }
+
+    .link {
+      color: #6a1b9a;
+      cursor: pointer;
+      text-decoration: underline;
+      display: block;
+      margin-top: 10px;
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f3e5f5;
+      border-radius: 8px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Login Page -->
+    <div id="loginPage">
+      <h2>Log In</h2>
+      <input type="email" id="loginEmail" placeholder="Email" required>
+      <input type="password" id="loginPass" placeholder="Password" required>
+      <button onclick="login()">Login</button>
+      <span class="link" onclick="showRegister()">Don’t have an account? Register</span>
+    </div>
+
+    <!-- Register Page -->
+    <div id="registerPage" style="display:none;">
+      <h2>Sign Up</h2>
+      <input type="text" id="regName" placeholder="Full Name" required>
+      <input type="email" id="regEmail" placeholder="Email" required>
+      <input type="password" id="regPass" placeholder="Password" required>
+      <button onclick="register()">Register</button>
+      <span class="link" onclick="showLogin()">Already have an account? Login</span>
+    </div>
+
+    <!-- Main App Section -->
+    <div id="appSection" style="display:none;">
+      <h1>HairCare Recommender</h1>
+      <p id="welcome"></p>
+
+      <form id="hairForm">
+        <label for="hairType">Select your hair type:</label>
+        <select id="hairType" required>
+          <option value="">--Choose--</option>
+          <option value="curly">Curly</option>
+          <option value="straight">Straight</option>
+          <option value="wavy">Wavy</option>
+          <option value="coily">Coily</option>
+        </select>
+
+        <label for="hairConcern">Select your concern:</label>
+        <select id="hairConcern" required>
+          <option value="">--Choose--</option>
+          <option value="dryness">Dryness</option>
+          <option value="dandruff">Dandruff</option>
+          <option value="breakage">Breakage</option>
+          <option value="frizz">Frizz</option>
+        </select>
+
+        <button type="submit">Get Recommendation</button>
+      </form>
+
+      <div id="result" class="result"></div>
+      <button onclick="logout()">Logout</button>
+    </div>
+
+  </div>
+
+  <script>
+    // Switch pages
+    function showRegister() {
+      document.getElementById("loginPage").style.display = "none";
+      document.getElementById("registerPage").style.display = "block";
+    }
+
+    function showLogin() {
+      document.getElementById("registerPage").style.display = "none";
+      document.getElementById("loginPage").style.display = "block";
+    }
+
+    // Register user
+    function register() {
+      const name = document.getElementById("regName").value;
+      const email = document.getElementById("regEmail").value;
+      const pass = document.getElementById("regPass").value;
+
+      if (!name || !email || !pass) {
+        alert("Please fill all fields");
+        return;
+      }
+
+      // Save user in localStorage
+      const user = { name, email, pass };
+      localStorage.setItem("user", JSON.stringify(user));
+      alert("Registration successful! Please log in.");
+      showLogin();
+    }
+
+    // Login user
+    function login() {
+      const email = document.getElementById("loginEmail").value;
+      const pass = document.getElementById("loginPass").value;
+
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+
+      if (storedUser && storedUser.email === email && storedUser.pass === pass) {
+        document.getElementById("loginPage").style.display = "none";
+        document.getElementById("appSection").style.display = "block";
+        document.getElementById("welcome").innerText = `Hello ${storedUser.name}, welcome back!`;
+      } else {
+        alert("Invalid email or password");
+      }
+    }
+
+    // Logout
+    function logout() {
+      document.getElementById("appSection").style.display = "none";
+      document.getElementById("loginPage").style.display = "block";
+    }
+
+    // Haircare Recommendation Logic
+    document.getElementById("hairForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const hairType = document.getElementById("hairType").value;
+      const hairConcern = document.getElementById("hairConcern").value;
+      const resultDiv = document.getElementById("result");
+
+      let recommendation = "";
+
+      if (hairConcern === "dryness") {
+        recommendation = `For ${hairType} hair with dryness: Use a sulfate-free moisturizing shampoo and deep condition weekly.`;
+      } else if (hairConcern === "dandruff") {
+        recommendation = `For ${hairType} hair with dandruff: Use an anti-dandruff shampoo with zinc pyrithione or tea tree oil.`;
+      } else if (hairConcern === "breakage") {
+        recommendation = `For ${hairType} hair with breakage: Incorporate protein treatments and avoid excessive heat.`;
+      } else if (hairConcern === "frizz") {
+        recommendation = `For ${hairType} hair with frizz: Use a leave-in conditioner and apply argan oil or shea butter.`;
+      }
+
+      resultDiv.style.display = "block";
+      resultDiv.innerHTML = `<strong>Recommendation:</strong><br>${recommendation}`;
+    });
+  </script>
+</body>
+</html>
